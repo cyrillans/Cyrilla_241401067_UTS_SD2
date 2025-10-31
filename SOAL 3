@@ -1,0 +1,118 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class Graph {
+private:
+    int numVertices;
+    vector<vector<pair<int, int>>> adjMatrix; // daftar tetangga: (tujuan, jarak)
+
+public:
+    Graph(int V) {
+        numVertices = V;
+        adjMatrix.resize(V);
+    }
+
+    void addEdge(int asal, int tujuan, int jarak) {
+        adjMatrix[asal].push_back({tujuan, jarak});
+        adjMatrix[tujuan].push_back({asal, jarak}); // graf tidak berarah
+    }
+
+    // ===== DFS =====
+    void dfsUtil(int node, vector<bool>& visited) {
+        visited[node] = true;
+        cout << char('A' + node) << " ";
+        for (auto& tetangga : adjMatrix[node]) {
+            if (!visited[tetangga.first]) {
+                dfsUtil(tetangga.first, visited);
+            }
+        }
+    }
+
+    void dfs(int start) {
+        vector<bool> visited(numVertices, false);
+        cout << "PENJELAJAHAN PARUL (DFS dari " << char('A' + start) << "):\n";
+        dfsUtil(start, visited);
+        cout << endl;
+    }
+
+    // ===== BFS =====
+    void bfs(int start, int goal) {
+        vector<bool> visited(numVertices, false);
+        vector<int> parent(numVertices, -1);
+        queue<int> q;
+
+        visited[start] = true;
+        q.push(start);
+
+        while (!q.empty()) {
+            int node = q.front();
+            q.pop();
+
+            for (auto& tetangga : adjMatrix[node]) {
+                if (!visited[tetangga.first]) {
+                    visited[tetangga.first] = true;
+                    parent[tetangga.first] = node;
+                    q.push(tetangga.first);
+
+                    if (tetangga.first == goal) break;
+                }
+            }
+        }
+
+        // jalur dari goal ke start
+        vector<int> path;
+        int cur = goal;
+        while (cur != -1) {
+            path.push_back(cur);
+            cur = parent[cur];
+        }
+
+        // Hitung total jarak
+        int totalJarak = 0;
+        for (int i = path.size() - 1; i > 0; i--) {
+            int u = path[i];
+            int v = path[i - 1];
+            for (auto& e : adjMatrix[u]) {
+                if (e.first == v) {
+                    totalJarak += e.second;
+                    break;
+                }
+            }
+        }
+
+        // Tampilkan hasil BFS
+        cout << "\nJALUR TERCEPAT PARUL (BFS):\n";
+        for (int i = path.size() - 1; i >= 0; i--) {
+            cout << char('A' + path[i]);
+            if (i != 0) cout << " -> ";
+        }
+        cout << "\nTotal langkah: " << path.size() - 1 << " edge" << endl;
+        cout << "Total jarak: " << totalJarak << " meter" << endl;
+    }
+};
+
+int main() {
+    Graph g(5); // A, B, C, D, E
+
+    // Tambahkan edge (gunakan indeks: A=0, B=1, C=2, D=3, E=4)
+    g.addEdge(0, 1, 4); // A-B
+    g.addEdge(0, 2, 2); // A-C
+    g.addEdge(1, 3, 3); // B-D
+    g.addEdge(2, 3, 1); // C-D
+    g.addEdge(3, 4, 5); // D-E
+
+    // Jalankan DFS dan BFS
+    g.dfs(0);       // DFS dari A
+    g.bfs(0, 4);    // BFS dari A ke E
+
+    cout << "\nKeterangan:\n";
+    cout << "A = Warung Kopi Pak Harry\n";
+    cout << "B = Kedai Coding IKLC\n";
+    cout << "C = Catfe Alya\n";
+    cout << "D = Studio Fasilkom-TI\n";
+    cout << "E = Wi-Fi Gratis Sejagat\n";
+
+    return 0;
+}
