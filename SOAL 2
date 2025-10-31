@@ -1,0 +1,151 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Barang {
+    string nama;
+    int harga;
+    int jumlah;
+    Barang* next;
+};
+
+class KeranjangBelanja {
+private:
+    Barang* head;
+
+public:
+    KeranjangBelanja() {
+        head = nullptr;
+    }
+
+    // Menambah barang  di paling belakang
+    void tambahBelakang(string nama, int harga, int jumlah) {
+        Barang* baru = new Barang{nama, harga, jumlah, nullptr};
+        if (head == nullptr) {
+            head = baru;
+            return;
+        }
+        Barang* temp = head;
+        while (temp->next != nullptr) {
+            temp = temp->next;
+        }
+        temp->next = baru;
+    }
+
+    // Menambah barang di depan
+    void tambahDepan(string nama, int harga, int jumlah) {
+        Barang* baru = new Barang{nama, harga, jumlah, head};
+        head = baru;
+    }
+
+    // Menambah setelah barang tertentu, ditengah/diantara .. & ..
+    void tambahSetelah(string target, string nama, int harga, int jumlah) {
+        Barang* temp = head;
+        while (temp != nullptr && temp->nama != target) {
+            temp = temp->next;
+        }
+
+        if (temp == nullptr) {
+            cout << "Barang dengan nama '" << target << "' tidak ditemukan!\n";
+            return;
+        }
+
+        Barang* baru = new Barang{nama, harga, jumlah, temp->next};
+        temp->next = baru;
+    }
+
+    // Menghapus berdasarkan nama barang
+    void hapusBarang(string nama) {
+        if (head == nullptr) {
+            cout << "Keranjang masih kosong!\n";
+            return;
+        }
+
+        // Jika barang yang dihapus ada di depan
+        if (head->nama == nama) {
+            Barang* hapus = head;
+            head = head->next;
+            delete hapus;
+            cout << "Barang '" << nama << "' berhasil dihapus!\n";
+            return;
+        }
+
+        Barang* temp = head;
+        while (temp->next != nullptr && temp->next->nama != nama) {
+            temp = temp->next;
+        }
+
+        if (temp->next == nullptr) {
+            cout << "Barang dengan nama '" << nama << "' tidak ditemukan!\n";
+            return;
+        }
+
+        Barang* hapus = temp->next;
+        temp->next = hapus->next;
+        delete hapus;
+        cout << "Barang '" << nama << "' berhasil dihapus!\n";
+    }
+
+    // Menampilkan isi keranjang
+    void tampilkan() {
+        if (head == nullptr) {
+            cout << "\nKeranjang kosong.\n";
+            return;
+        }
+
+        int totalBarang = 0;
+        int totalHarga = 0;
+
+        cout << "\n--- ISI KERANJANG BELANJA ---\n";
+        Barang* temp = head;
+        while (temp != nullptr) {
+            cout << temp->nama << " - Rp" << temp->harga
+                 << " x" << temp->jumlah << endl;
+            totalBarang++;
+            totalHarga += temp->harga * temp->jumlah;
+            temp = temp->next;
+        }
+
+        cout << "\nTotal barang: " << totalBarang << endl;
+        cout << "Total harga: Rp" << totalHarga << endl;
+    }
+};
+
+int main() {
+    KeranjangBelanja keranjang;
+    int n;
+
+    cout << "Masukkan jumlah barang awal: ";
+    cin >> n;
+    cin.ignore();
+
+    for (int i = 0; i < n; i++) {
+        string nama;
+        int harga, jumlah;
+        cout << "\nBarang " << i + 1 << ":\n";
+        cout << "Nama: ";
+        getline(cin, nama);
+        cout << "Harga: ";
+        cin >> harga;
+        cout << "Jumlah: ";
+        cin >> jumlah;
+        cin.ignore();
+
+        keranjang.tambahBelakang(nama, harga, jumlah);
+    }
+
+    char hapus;
+    cout << "\nApakah ingin menghapus barang? (y/n): ";
+    cin >> hapus;
+    cin.ignore();
+
+    if (hapus == 'y' || hapus == 'Y') {
+        string namaHapus;
+        cout << "Masukkan nama barang yang ingin dihapus: ";
+        getline(cin, namaHapus);
+        keranjang.hapusBarang(namaHapus);
+    }
+
+    keranjang.tampilkan();
+    return 0;
+}
